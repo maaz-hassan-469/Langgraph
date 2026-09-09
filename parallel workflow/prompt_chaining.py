@@ -43,7 +43,7 @@ def evaluate_thought(state:state):
 def final_evaluation(state:state):
     prompt=f"""based on the following feedbacks create a summarized feedback \n language feedback:{state['language_feedback']}\n analysis feedback:{state['analysis_feedback']}\n clarity feedback:{state['clarity_feedback']}
 """
-    overall_feedback=structured_model.invoke(prompt).content
+    overall_feedback=structured_model.invoke(prompt).feedback
     avg_score=sum(state["individual_scores"])/len(state["individual_scores"])
     return {"overall_feedback":overall_feedback,"avg_score":avg_score}
 
