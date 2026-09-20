@@ -24,9 +24,16 @@ graph.add_edge("chatbot",END)
 
 workflow=graph.compile()
 
-initial_state={
-    "messages":[HumanMessage(content="what is the capital of pakistan ")]
-}
+while True:
+    user_message=input("type here:")
+    if user_message.strip().lower() in ["exit","bye","quit"]:
+        break
 
-result=workflow.invoke(initial_state)["messages"][-1].content
-print(result)
+    response=workflow.invoke({"messages":[HumanMessage(content=user_message)]})
+    print("AI:",response["messages"][-1].content)
+
+
+
+
+
+
