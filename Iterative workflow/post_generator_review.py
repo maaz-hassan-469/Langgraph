@@ -14,7 +14,7 @@ class poststate(TypedDict):
     max_iteration:int
 
 class tweetevaluation(BaseModel):
-    evaluation:Literal["approved","needs_approvement"]=Field(description="final evaluation of the feedback")
+    evaluation:Literal["approved","need_approvement"]=Field(description="final evaluation of the feedback")
     feedback:str=Field(...,description="feedback for the tweet")
 
 evaluator_llm=model.with_structured_output(tweetevaluation)
@@ -39,7 +39,7 @@ def evaluate_tweet(state:poststate):
     prompt=f"""Evaluate the following generated social media post and decide whether it should be approved or needs improvement.
 
     Post:
-    "{state['post']}"
+    "{state['tweet']}"
 
     Evaluate it based on these criteria:
 
@@ -55,12 +55,12 @@ def evaluate_tweet(state:poststate):
 
     Decision rules:
     - Approve the post only if it satisfies the criteria reasonably well.
-    - If there are noticeable weaknesses that could reduce its quality or effectiveness, mark it as "needs_improvement".
+    - If there are noticeable weaknesses that could reduce its quality or effectiveness, mark it as "need_improvement".
     - Do not rewrite the post unless necessary to explain what should be improved.
 
     Respond ONLY in this structured format:
 
-    evaluation: "approved" or "needs_improvement"
+    evaluation: "approved" or "need_improvement"
     feedback: "Briefly explain the main strengths and weaknesses of the post and, if improvement is needed, clearly state what should be changed."""
 
     response=evaluator_llm.invoke(prompt)
@@ -90,11 +90,34 @@ def optimmize_tweet(state:poststate):
     - Keep it under 280 characters.
     - Preserve the original idea when possible rather than changing the topic completely.
     - Output ONLY the improved tweet, with no explanation, labels, or quotation marks.""")]
-    response=model.invoke(messages)
+    response=model.invoke(messages).content
     iteration=state["iteration"]+1    
     return {"tweet":response,"iteration":iteration}
+
+def route_evaluation(state:poststate):
+    if state["evaluation"]=="approved" or state["iteration"]>=state["max_iteration"]:
+        return "approved"
+    else: 
+        return "need_improvement" 
+
 
 
 graph.add_node("generate",generate_tweet)
 graph.add_node("evaluate",evaluate_tweet)
 graph.add_node("optimize",optimmize_tweet)
+
+graph.add_edge(START,"generate")
+graph.add_edge("generate","evaluate")
+graph.add_conditional_edges("evaluate",route_evaluation ,{"approved":END,"need_improvement":"optimize"})
+graph.add_edge("optimize","evaluate")
+
+workflow=graph.compile()
+
+initial_state={
+    "topic":"pakistan cricket",
+    "iteration":0,
+    "max_iteration":5
+}
+
+result=workflow.invoke(initial_state)
+print(result)
