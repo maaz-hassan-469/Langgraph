@@ -60,9 +60,9 @@ graph.add_edge("no_real_roots",END)
 
 workflow=graph.compile()
 
-initial_state={"a":5,
-               "b":6,
-               "c":0}
+initial_state={"a":10,
+               "b":5,
+               "c":1}
 
 result=workflow.invoke(initial_state)
 
