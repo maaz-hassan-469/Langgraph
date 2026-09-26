@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 from langchain_ollama import ChatOllama
 from typing import TypedDict, Annotated
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import InMemorySaver
 
@@ -24,11 +24,3 @@ graph.add_edge("chat_node", END)
 
 chat_bot = graph.compile(checkpointer=checkpointer)
 
-# Fix: Stream using stream_mode="messages" safely
-for message_chunk, metadata in chat_bot.stream(
-    {"messages": [HumanMessage(content="what is the recipe to make pasta")]},
-    config={"configurable": {"thread_id": "thread_1"}},
-    stream_mode="messages"
-):
-    if message_chunk.content:
-        print(message_chunk.content, end="", flush=True)
