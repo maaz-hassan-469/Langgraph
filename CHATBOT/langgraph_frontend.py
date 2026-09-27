@@ -3,6 +3,8 @@ from langgraph_backend import chat_bot
 from langchain_core.messages import HumanMessage
 import uuid
 
+st.set_page_config(page_title="LangGraph Chatbot", layout="wide", initial_sidebar_state="expanded")
+
 #**********************utilities function*******************
 def generate_thread_id():
     thread_id=uuid.uuid4()
@@ -21,7 +23,7 @@ def load_conversation(thread_id):
     return chat_bot.get_state(config={"configurable":{"thread_id":thread_id}}).values['messages']
 
 
-CONFIG = {"configurable": {"thread_id": st.session_state["thread_id"]}}
+
 #**********************session setup***********************
 # 1. Fix typo in session state initialization
 if "message_history" not in st.session_state:
@@ -33,8 +35,7 @@ if "chat_threads" not in st.session_state:
 
 add_thread(st.session_state["thread_id"])
 
-
-
+CONFIG = {"configurable": {"thread_id": st.session_state["thread_id"]}}
 
 #***********************sidebar setup**********************
 
