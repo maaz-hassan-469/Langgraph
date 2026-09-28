@@ -1,4 +1,7 @@
 /venv   
 /Streaming/__pycache__
-.db
 .env
+*.db
+*.db-wal
+*.db-shm
+*.pyc
